@@ -1,33 +1,23 @@
 # EmberKeeper
 
-A [libGDX](https://libgdx.com/) project generated with [gdx-liftoff](https://github.com/libgdx/gdx-liftoff).
+Projeto de laboratório da disciplina de Jogos Digitais, orientado pelo Prof. Me. Luiz Carlos Machi Lozano.
 
-This project was generated with a template including simple application launchers and an empty `ApplicationListener` implementation.
+- Autor: Mateus Kenzo Iochimoto  
+- RA: 10400995
 
-## Platforms
+## Objetivo
 
-- `core`: Main module with the application logic shared by all platforms.
-- `lwjgl3`: Primary desktop platform using LWJGL3; was called 'desktop' in older docs.
+Desenvolver um jogo sério voltado ao processo de reabilitação física, utilizando a libGDX para a implementação prática.  
+O projeto deve integrar-se com um dispositivo IoT (Internet das Coisas) que coleta dados de pedaladas em uma bicicleta ergométrica (estática), transformando o exercício em uma experiência gamificada.
 
-## Gradle
+O jogo deve ser funcional e integrar aspectos que incentivem a melhoria do paciente/jogador, utilizando a velocidade e a consistência das pedaladas como métricas de avaliação.
 
-This project uses [Gradle](https://gradle.org/) to manage dependencies.
-The Gradle wrapper was included, so you can run Gradle tasks using `gradlew.bat` or `./gradlew` commands.
-Useful Gradle tasks and flags:
+## Tecnologias
 
-- `--continue`: when using this flag, errors will not stop the tasks from running.
-- `--daemon`: thanks to this flag, Gradle daemon will be used to run chosen tasks.
-- `--offline`: when using this flag, cached dependency archives will be used.
-- `--refresh-dependencies`: this flag forces validation of all dependencies. Useful for snapshot versions.
-- `build`: builds sources and archives of every project.
-- `cleanEclipse`: removes Eclipse project data.
-- `cleanIdea`: removes IntelliJ project data.
-- `clean`: removes `build` folders, which store compiled classes and built archives.
-- `eclipse`: generates Eclipse project data.
-- `idea`: generates IntelliJ project data.
-- `lwjgl3:jar`: builds application's runnable jar, which can be found at `lwjgl3/build/libs`.
-- `lwjgl3:run`: starts the application.
-- `test`: runs unit tests (if any).
+- libGDX
+- Dispositivo IoT para leitura de pedaladas em bicicleta ergométrica
 
-Note that most tasks that are not specific to a single project can be run with `name:` prefix, where the `name` should be replaced with the ID of a specific project.
-For example, `core:clean` removes `build` folder only from the `core` project.
+## Métricas de Avaliação
+
+- Velocidade das pedaladas
+- Consistência das pedaladas
