@@ -1,3 +1,9 @@
+Projeto do laboratório da disciplina de Jogos Digitais
+orientado pelo Prof. Me. Luiz Carlos Machi Lozano
+
+Autor: Mateus Kenzo Iochimoto
+RA: 10400995
+
 Objetivo
 
 Desenvolver um jogo sério voltado para o processo de reabilitação física que utilize a libGDX
