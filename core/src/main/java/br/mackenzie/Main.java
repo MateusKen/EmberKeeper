@@ -94,14 +94,19 @@ public class Main implements ApplicationListener {
         marcadorPos -= decaimento * dt;
         marcadorPos = Math.max(0f, marcadorPos);
 
+        // checa se alguma linha está sobre as áreas no momento do input
+        boolean acerto = rhythmBar.isAnyLineOverlappingAreas(viewport);
+        float baseMove = velocidade * dt * 10f;
+        float multiplier = acerto ? 2f : 1f; // dobra o movimento em caso de acerto
+
         // Se apertar esquerda e a última não foi esquerda
         if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.LEFT) && ultimaTecla != 1) {
-            marcadorPos = Math.max(0f, marcadorPos + velocidade * dt * 10f);
+            marcadorPos = Math.max(0f, marcadorPos + baseMove * multiplier);
             ultimaTecla = 1;
         }
         // Se apertar direita e a última não foi direita
         if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.RIGHT) && ultimaTecla != 2) {
-            marcadorPos = Math.min(1f, marcadorPos + velocidade * dt * 10f);
+            marcadorPos = Math.min(1f, marcadorPos + baseMove * multiplier);
             ultimaTecla = 2;
         }
     }
