@@ -64,7 +64,7 @@ public class Main implements ApplicationListener {
         // Spawna linhas de ritmo a cada 1 segundo (exemplo)
         tempoSpawn += dt;
         if (tempoSpawn > 1f) {
-            rhythmBar.spawnLinha();
+            //rhythmBar.spawnLinha();
             tempoSpawn = 0f;
         }
         rhythmBar.update(dt);

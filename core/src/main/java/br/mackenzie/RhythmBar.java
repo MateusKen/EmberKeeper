@@ -1,10 +1,10 @@
+// java
 package br.mackenzie;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class RhythmBar {
@@ -12,23 +12,32 @@ public class RhythmBar {
     private float margem = 0.3f;
     private float larguraBarra;
     private float y;
-    private float velocidadeLinha = 3f; // velocidade das linhas
+    private float velocidadeLinha = 3f; // velocidade das linhas (unidade: world units por segundo)
     private float areaInputPerc = 0.15f; // porcentagem da área de input
 
-    private List<Float> linhas = new ArrayList<>(); // posições X das linhas
+    private List<Float> linhas = new ArrayList<>(); // posições normalizadas X das linhas (0..1)
 
     public void spawnLinha() {
         linhas.add(1f); // começa na ponta direita (1f = 100%)
     }
 
     public void update(float dt) {
-        Iterator<Float> it = linhas.iterator();
-        while (it.hasNext()) {
-            float x = it.next() - velocidadeLinha * dt / larguraBarra;
-            if (x < 0f) it.remove();
-            else {
-                it.remove();
-                linhas.add(x);
+        // Se larguraBarra ainda não foi calculada (ex: antes do primeiro draw), evita divisão por zero.
+        if (larguraBarra <= 0f) return;
+
+        // Atualiza posições usando índice para evitar ConcurrentModificationException
+        for (int i = 0; i < linhas.size(); ) {
+            float pos = linhas.get(i);
+            float deltaNormalized = (velocidadeLinha * dt) / larguraBarra; // movimentação normalizada
+            float newPos = pos - deltaNormalized;
+
+            if (newPos < 0f) {
+                // remove linha que saiu da tela
+                linhas.remove(i);
+            } else {
+                // atualiza posição
+                linhas.set(i, newPos);
+                i++;
             }
         }
     }
