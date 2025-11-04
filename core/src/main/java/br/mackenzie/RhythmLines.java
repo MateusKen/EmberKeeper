@@ -23,7 +23,8 @@ public class RhythmLines {
     private float lineWidth = 0.05f;
 
     private final List<Float> linhas = new ArrayList<>();
-    private int trackedIndex = -1;
+    // substitui o índice instável por uma posição rastreada
+    private float trackedPos = -1f;
     private Color trackedColor = Color.RED;
     private boolean debug = false;
 
@@ -62,27 +63,33 @@ public class RhythmLines {
         }
 
         // Movimento e remoção offscreen
+        float deltaNormalized = (velocidadeLinha * dt) / bar.getLarguraBarra();
+        float offscreen = 0f - (lineWidth / Math.max(1e-6f, bar.getLarguraBarra()));
+
         for (int i = 0; i < linhas.size(); ) {
             float pos = linhas.get(i);
-            float deltaNormalized = (velocidadeLinha * dt) / bar.getLarguraBarra();
             float newPos = pos - deltaNormalized;
 
-            float offscreen = 0f - (lineWidth / Math.max(1e-6f, bar.getLarguraBarra()));
             if (newPos < offscreen) {
-                // Ajusta seleção ao remover
-                if (trackedIndex != -1) {
-                    if (i < trackedIndex) {
-                        trackedIndex--;
-                    } else if (i == trackedIndex) {
-                        int prevIdx = findNearestLeftIndex(pos);
-                        int nextIdx = findNearestRightIndex(pos);
-                        trackedIndex = (prevIdx != -1) ? prevIdx : nextIdx;
-                    }
-                }
                 linhas.remove(i);
             } else {
                 linhas.set(i, newPos);
                 i++;
+            }
+        }
+
+        // Atualiza trackedPos para acompanhar a linha rastreada; se ficar offscreen,
+        // tenta apontar para a primeira linha visível (a mais à esquerda dentro da tela).
+        // Se não houver nenhuma, reseta para -1f.
+        if (trackedPos >= 0f) {
+            trackedPos -= deltaNormalized;
+            if (trackedPos < offscreen) {
+                int firstVisible = findFirstVisibleIndex(offscreen);
+                if (firstVisible != -1) {
+                    trackedPos = linhas.get(firstVisible);
+                } else {
+                    trackedPos = -1f;
+                }
             }
         }
     }
@@ -98,11 +105,13 @@ public class RhythmLines {
             }
         }
 
+        int currentTrackedIdx = findNearestIndexForTrackedPos();
+
         shape.begin(ShapeRenderer.ShapeType.Filled);
         for (int i = 0; i < linhas.size(); i++) {
             float pos = linhas.get(i);
             float x = bar.worldX(pos);
-            boolean isTracked = (i == trackedIndex);
+            boolean isTracked = (i == currentTrackedIdx);
 
             if (isTracked) {
                 shape.setColor(trackedColor);
@@ -141,32 +150,32 @@ public class RhythmLines {
     }
 
     public void selectMostLeft() {
-        if (linhas.isEmpty()) { trackedIndex = -1; return; }
+        if (linhas.isEmpty()) { trackedPos = -1f; return; }
         float minPos = Float.MAX_VALUE;
-        int minIdx = -1;
-        for (int i = 0; i < linhas.size(); i++) {
-            float p = linhas.get(i);
-            if (p < minPos) { minPos = p; minIdx = i; }
+        for (float p : linhas) {
+            if (p < minPos) minPos = p;
         }
-        trackedIndex = minIdx;
+        trackedPos = minPos;
     }
 
     public void moveTrackedToPrevious() {
-        if (linhas.isEmpty()) { trackedIndex = -1; return; }
-        if (trackedIndex == -1) { selectMostLeft(); return; }
-        float currentPos = linhas.get(trackedIndex);
+        if (linhas.isEmpty()) { trackedPos = -1f; return; }
+        int curIdx = findNearestIndexForTrackedPos();
+        if (curIdx == -1) { selectMostLeft(); return; }
+        float currentPos = linhas.get(curIdx);
         int prevIdx = findNearestLeftIndex(currentPos);
         if (prevIdx == -1) prevIdx = findNearestRightIndex(currentPos);
-        trackedIndex = prevIdx;
+        if (prevIdx != -1) trackedPos = linhas.get(prevIdx);
     }
 
     public void moveTrackedToNext() {
-        if (linhas.isEmpty()) { trackedIndex = -1; return; }
-        if (trackedIndex == -1) { selectMostLeft(); return; }
-        float currentPos = linhas.get(trackedIndex);
+        if (linhas.isEmpty()) { trackedPos = -1f; return; }
+        int curIdx = findNearestIndexForTrackedPos();
+        if (curIdx == -1) { selectMostLeft(); return; }
+        float currentPos = linhas.get(curIdx);
         int nextIdx = findNearestRightIndex(currentPos);
         if (nextIdx == -1) nextIdx = findNearestLeftIndex(currentPos);
-        trackedIndex = nextIdx;
+        if (nextIdx != -1) trackedPos = linhas.get(nextIdx);
     }
 
     private int findNearestLeftIndex(float pos) {
@@ -195,21 +204,51 @@ public class RhythmLines {
         return best;
     }
 
-    // Mantido para compatibilidade (não usado quando RhythmBar decide pelo lado)
+    // encontra o índice mais próximo da trackedPos (ou -1 se não houver linhas)
+    private int findNearestIndexForTrackedPos() {
+        if (trackedPos < 0f || linhas.isEmpty()) return -1;
+        int bestIdx = -1;
+        float bestDist = Float.MAX_VALUE;
+        for (int i = 0; i < linhas.size(); i++) {
+            float d = Math.abs(linhas.get(i) - trackedPos);
+            if (d < bestDist) {
+                bestDist = d;
+                bestIdx = i;
+            }
+        }
+        return bestIdx;
+    }
+
+    // retorna a primeira linha que está visível (a mais à esquerda dentro do limite offscreen)
+    private int findFirstVisibleIndex(float offscreenThreshold) {
+        int best = -1;
+        float bestPos = Float.MAX_VALUE;
+        for (int i = 0; i < linhas.size(); i++) {
+            float p = linhas.get(i);
+            if (p >= offscreenThreshold && p < bestPos) {
+                bestPos = p;
+                best = i;
+            }
+        }
+        return best;
+    }
+
     public void onPlayerClick(Viewport viewport) {
         moveTrackedToPrevious();
     }
 
     public float getTrackedLinePos() {
-        if (trackedIndex >= 0 && trackedIndex < linhas.size()) return linhas.get(trackedIndex);
+        int idx = findNearestIndexForTrackedPos();
+        if (idx >= 0 && idx < linhas.size()) return linhas.get(idx);
         return -1f;
     }
 
     public boolean isTrackedLineOverlappingAreas(RhythmBarAreas bar) {
-        if (trackedIndex < 0 || trackedIndex >= linhas.size()) return false;
+        int idx = findNearestIndexForTrackedPos();
+        if (idx < 0 || idx >= linhas.size()) return false;
         if (bar.getLarguraBarra() <= 0f) return false;
         float eps = bar.computeEps(lineWidth);
-        float pos = linhas.get(trackedIndex);
+        float pos = linhas.get(idx);
         String area = bar.resolveAreaPortuguese(pos, eps);
         return !"FORA".equals(area);
     }
@@ -220,19 +259,21 @@ public class RhythmLines {
             return;
         }
         float eps = bar.computeEps(lineWidth);
+        int trackedIdx = findNearestIndexForTrackedPos();
         for (int i = 0; i < linhas.size(); i++) {
             float pos = linhas.get(i);
             String area = bar.resolveAreaPortuguese(pos, eps);
-            String trackedMark = (i == trackedIndex) ? " (TRACKED)" : "";
+            String trackedMark = (i == trackedIdx) ? " (TRACKED)" : "";
             System.out.printf("TECLA: linha #%d pos=%.4f área=%s%s%n", i, pos, area, trackedMark);
         }
     }
 
     public String getTrackedAreaPortuguese(RhythmBarAreas bar) {
-        if (trackedIndex < 0 || trackedIndex >= linhas.size()) return "FORA";
+        int idx = findNearestIndexForTrackedPos();
+        if (idx < 0 || idx >= linhas.size()) return "FORA";
         if (bar.getLarguraBarra() <= 0f) return "FORA";
         float eps = bar.computeEps(lineWidth);
-        float pos = linhas.get(trackedIndex);
+        float pos = linhas.get(idx);
         return bar.resolveAreaPortuguese(pos, eps);
     }
 
@@ -275,7 +316,7 @@ public class RhythmLines {
     public void reset() {
         linhas.clear();
         spawnAccumulator = 0f;
-        trackedIndex = -1;
+        trackedPos = -1f;
         initialSpawnDone = false;
     }
 }

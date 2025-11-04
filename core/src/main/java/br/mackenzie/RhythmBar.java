@@ -13,21 +13,31 @@ public class RhythmBar {
     private Viewport lastViewport;
     private float lineWidth = 0.05f;
 
+    // Posição configurável (margem horizontal e coordenada Y)
+    private float posMargem = 0.3f;
+    private float posY = 0.3f;
+
+    public void setPosition(float margem, float y) {
+        this.posMargem = margem;
+        this.posY = y;
+    }
+
     public void update(float dt) {
         if (lastViewport == null) return;
-        barAreas.updateLayout(lastViewport);
+        barAreas.updateLayout(lastViewport, posMargem, posY);
         rhythmLines.update(dt, barAreas);
     }
 
     public void update(float dt, Viewport viewport) {
         this.lastViewport = viewport;
-        barAreas.updateLayout(viewport);
+        barAreas.updateLayout(viewport, posMargem, posY);
         rhythmLines.update(dt, barAreas);
     }
 
     public void draw(ShapeRenderer shape, Viewport viewport) {
         this.lastViewport = viewport;
-        barAreas.updateLayout(viewport);
+        barAreas.updateLayout(viewport, posMargem, posY);
+        // Agora a RhythmBar é responsável por desenhar a barra (via barAreas) e as linhas
         barAreas.draw(shape, viewport);
         rhythmLines.draw(shape, barAreas, viewport);
     }
@@ -39,7 +49,7 @@ public class RhythmBar {
 
     public void onPlayerClick(Viewport viewport) {
         this.lastViewport = viewport;
-        barAreas.updateLayout(viewport);
+        barAreas.updateLayout(viewport, posMargem, posY);
 
         float pos = rhythmLines.getTrackedLinePos();
         if (pos < 0f) { rhythmLines.selectMostLeft(); return; }
@@ -58,19 +68,19 @@ public class RhythmBar {
 
     public boolean isTrackedLineOverlappingAreas(Viewport viewport) {
         this.lastViewport = viewport;
-        barAreas.updateLayout(viewport);
+        barAreas.updateLayout(viewport, posMargem, posY);
         return rhythmLines.isTrackedLineOverlappingAreas(barAreas);
     }
 
     public void printLinesAreas(Viewport viewport) {
         this.lastViewport = viewport;
-        barAreas.updateLayout(viewport);
+        barAreas.updateLayout(viewport, posMargem, posY);
         rhythmLines.printLinesAreas(barAreas);
     }
 
     public String getTrackedAreaPortuguese(Viewport viewport) {
         this.lastViewport = viewport;
-        barAreas.updateLayout(viewport);
+        barAreas.updateLayout(viewport, posMargem, posY);
         if (rhythmLines.getTrackedLinePos() < 0f) return "FORA";
         float eps = barAreas.computeEps(lineWidth);
         return barAreas.resolveAreaPortuguese(rhythmLines.getTrackedLinePos(), eps);
@@ -80,7 +90,7 @@ public class RhythmBar {
     public void setDebug(boolean debug) { rhythmLines.setDebug(debug); }
 
     public void setAltura(float altura) { barAreas.setAltura(altura); }
-    public void setMargem(float margem) { barAreas.setMargem(margem); }
+    public void setMargem(float margem) { this.posMargem = margem; barAreas.setMargem(margem); }
     public void setBorderThickness(float borderThickness) { barAreas.setBorderThickness(borderThickness); }
     public void setInnerAreaWidthPerc(float innerAreaWidthPerc) { barAreas.setInnerAreaWidthPerc(innerAreaWidthPerc); }
     public void setOuterAreaWidthPerc(float outerAreaWidthPerc) { barAreas.setOuterAreaWidthPerc(outerAreaWidthPerc); }

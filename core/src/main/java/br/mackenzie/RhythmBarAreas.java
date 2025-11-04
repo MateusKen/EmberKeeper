@@ -21,9 +21,16 @@ public class RhythmBarAreas {
     private float larguraBarra = 0f;
     private float y = 0f;
 
+    // Atualiza layout usando a margem/y configurados internamente
     public void updateLayout(Viewport viewport) {
+        updateLayout(viewport, this.margem, this.margem);
+    }
+
+    // Nova sobrecarga: permite passar margem (x) e y explicitamente
+    public void updateLayout(Viewport viewport, float margem, float y) {
+        this.margem = margem;
+        this.y = y;
         this.larguraBarra = viewport.getWorldWidth() - 2f * margem;
-        this.y = margem;
 
         // Clamps para manter áreas válidas
         float combinedWidthPerc = outerAreaWidthPerc * 2f + innerAreaWidthPerc;

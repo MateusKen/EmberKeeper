@@ -1,6 +1,9 @@
 // java
 package br.mackenzie;
 
+import br.mackenzie.level.BpmLevelConfig;
+import br.mackenzie.level.LevelConfig;
+import br.mackenzie.level.LevelManager;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -37,6 +40,8 @@ public class Main implements ApplicationListener {
 
     private RhythmBar rhythmBar;
 
+    private LevelManager levelManager;
+
     @Override
     public void create() {
         viewport = new FitViewport(8, 5);
@@ -54,6 +59,12 @@ public class Main implements ApplicationListener {
 
         rhythmBar.setSpawnRate(1.5f);
         rhythmBar.setVelocidadeLinha(5f);
+
+        levelManager = new LevelManager();
+        levelManager.addLevel(new BpmLevelConfig("Intro", 80f, 1f, 4f, 0.05f));
+        levelManager.addLevel(new BpmLevelConfig("Fase Rápida", 140f, 1.5f, 6f, 0.045f));
+        levelManager.addLevel(new BpmLevelConfig("Calma", 60f, 0.5f, 3f, 0.06f));
+        levelManager.applyTo(rhythmBar);
     }
 
     @Override
@@ -102,6 +113,24 @@ public class Main implements ApplicationListener {
         marcadorPos = Math.max(0f, marcadorPos);
 
         float baseMove = velocidade * dt * 20f;
+
+        if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.N)) { // próxima fase
+            if (levelManager != null) {
+                levelManager.next();
+                levelManager.applyTo(rhythmBar);
+                LevelConfig cur = levelManager.getCurrent();
+                System.out.println("LEVEL: " + (cur != null ? cur.getName() : "nenhum"));
+            }
+        }
+
+        if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.B)) { // fase anterior
+            if (levelManager != null) {
+                levelManager.previous();
+                levelManager.applyTo(rhythmBar);
+                LevelConfig cur = levelManager.getCurrent();
+                System.out.println("LEVEL: " + (cur != null ? cur.getName() : "nenhum"));
+            }
+        }
 
         if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.LEFT) && ultimaTecla != 1) {
             if (rhythmBar.getTrackedLinePos() < 0f) rhythmBar.selectMostLeft();

@@ -1,0 +1,8 @@
+java.lang.IllegalStateException: SpriteBatch.end must be called before begin.
+	at com.badlogic.gdx.graphics.g2d.SpriteBatch.begin(SpriteBatch.java:189)
+	at br.mackenzie.Main.draw(Main.java:153)
+	at br.mackenzie.Main.render(Main.java:139)
+	at com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window.update(Lwjgl3Window.java:435)
+	at com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application.loop(Lwjgl3Application.java:181)
+	at com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application.<init>(Lwjgl3Application.java:153)
+	at br.mackenzie.lwjgl3.Lwjgl3Launcher.main(Lwjgl3Launcher.java:23)
