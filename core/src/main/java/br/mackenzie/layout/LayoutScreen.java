@@ -21,7 +21,7 @@ public class LayoutScreen extends ScreenAdapter implements GameCompletionListene
     private Skin skin;
     private Table mainTable;
 
-    private TopBarUI topBar;
+    private HeatBarUI topBar;
     private GameAreaUI gameArea;
     private RhythmBarUI rhythmBar;
     private EndScreenUI endScreen;
@@ -50,8 +50,8 @@ public class LayoutScreen extends ScreenAdapter implements GameCompletionListene
         buttonStyle.over = skin.newDrawable("white", Color.GRAY);
         skin.add("default", buttonStyle);
 
-        topBar = new TopBarUI(skin);
-        gameArea = new GameAreaUI(skin, this);
+        topBar = new HeatBarUI();
+        gameArea = new GameAreaUI(skin, this, topBar);
         rhythmBar = new RhythmBarUI(gameArea.getRhythmManager());
 
         mainTable = new Table();

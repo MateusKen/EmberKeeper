@@ -1,6 +1,7 @@
 package br.mackenzie.layout.gameAreaUI;
 
 import br.mackenzie.layout.GameCompletionListener;
+import br.mackenzie.layout.HeatBarUI;
 import br.mackenzie.layout.gameAreaUI.enums.GameMode;
 import br.mackenzie.layout.gameAreaUI.enums.HitResult;
 import br.mackenzie.layout.gameAreaUI.enums.PlayerDirection;
@@ -14,17 +15,19 @@ public class GameAreaUI extends Table {
     private RightPaneUI rightPane;
     private final GameCompletionListener completionListener;
     private final RhythmManager rhythmManager;
+    private final HeatBarUI heatBar;
 
     private final GameMode[] modes = GameMode.values();
     private int currentModeIndex = 0;
-    private PlayerDirection lastHitDirection = PlayerDirection.RIGHT;
     private int currentItemFrameIndex = 0;
+    private PlayerDirection lastHitDirection = PlayerDirection.RIGHT;
 
-    public GameAreaUI(Skin skin, GameCompletionListener listener) {
+    public GameAreaUI(Skin skin, GameCompletionListener listener, HeatBarUI heatBar) {
         super(skin);
         this.completionListener = listener;
-        // Forneça a largura da sua barra de ritmo aqui. Ajuste o valor conforme necessário.
-        this.rhythmManager = new RhythmManager(800f);
+        this.rhythmManager = new RhythmManager(120.0f);
+        this.heatBar = heatBar; // Recebe a instância da HeatBar
+
         leftPane = new LeftPaneUI(skin);
         rebuildRightPane();
         this.setDebug(true);
@@ -33,21 +36,25 @@ public class GameAreaUI extends Table {
     @Override
     public void act(float delta) {
         super.act(delta);
-        rhythmManager.update(delta); // Atualiza a lógica de ritmo
+        rhythmManager.update(delta);
+        heatBar.act(delta); // Atualiza a barra de calor para que ela regrida
     }
 
     private void buildLayout() {
         this.clearChildren();
-        this.add(leftPane).expand().fill();
-        this.add(rightPane).expand().fill();
+        // A HeatBar não é mais adicionada aqui
+        Table panesTable = new Table();
+        panesTable.add(leftPane).expand().fill();
+        panesTable.add(rightPane).expand().fill();
+        this.add(panesTable).expand().fill();
     }
 
     public void processHit(PlayerDirection hitDirection) {
-        // A alternância agora é verificada pela própria nota no RhythmManager
         HitResult result = rhythmManager.checkHit(hitDirection);
 
         if (result == HitResult.PERFECT || result == HitResult.GOOD) {
-            // Atualiza a direção do jogador para animação
+            heatBar.registerHit(); // Incrementa a barra de calor
+            leftPane.showCheeringCrowd(); // Mostra a torcida feliz
             leftPane.setPlayerDirection(hitDirection);
             lastHitDirection = hitDirection;
 
@@ -74,6 +81,9 @@ public class GameAreaUI extends Table {
                     }
                 }
             }
+        } else {
+            // Se errou (Miss), mostra a multidão padrão
+            leftPane.showDefaultCrowd();
         }
     }
 
@@ -105,7 +115,7 @@ public class GameAreaUI extends Table {
 
         currentItemFrameIndex = 0;
         GameMode newMode = modes[currentModeIndex];
-        rhythmManager.setMode(newMode); // Informa ao manager sobre a mudança de modo
+        rhythmManager.setMode(newMode);
 
         int frameCount = GameModeConfig.getFrameCount(newMode);
         int completions = GameModeConfig.getCompletions(newMode);
@@ -135,5 +145,6 @@ public class GameAreaUI extends Table {
         if (rightPane != null) {
             rightPane.dispose();
         }
+        heatBar.dispose();
     }
 }
