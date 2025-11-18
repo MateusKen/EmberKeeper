@@ -4,6 +4,7 @@ import br.mackenzie.layout.GameCompletionListener;
 import br.mackenzie.layout.gameAreaUI.enums.GameMode;
 import br.mackenzie.layout.gameAreaUI.enums.HitResult;
 import br.mackenzie.layout.gameAreaUI.enums.PlayerDirection;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 
@@ -22,7 +23,8 @@ public class GameAreaUI extends Table {
     public GameAreaUI(Skin skin, GameCompletionListener listener) {
         super(skin);
         this.completionListener = listener;
-        this.rhythmManager = new RhythmManager();
+        // Forneça a largura da sua barra de ritmo aqui. Ajuste o valor conforme necessário.
+        this.rhythmManager = new RhythmManager(800f);
         leftPane = new LeftPaneUI(skin);
         rebuildRightPane();
         this.setDebug(true);
@@ -114,6 +116,18 @@ public class GameAreaUI extends Table {
 
     public RhythmManager getRhythmManager() {
         return rhythmManager;
+    }
+
+    public void handlePlayerAction(PlayerDirection hitDirection) {
+        HitResult result = rhythmManager.checkHit(hitDirection);
+
+        if (result == HitResult.PERFECT || result == HitResult.GOOD) {
+            // Se o acerto foi bom ou perfeito, mostra a torcida
+            leftPane.showCheeringCrowd();
+        } else {
+            // Se errou, mostra a multidão padrão
+            leftPane.showDefaultCrowd();
+        }
     }
 
     public void dispose() {

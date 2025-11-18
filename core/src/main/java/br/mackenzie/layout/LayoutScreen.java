@@ -61,10 +61,13 @@ public class LayoutScreen extends ScreenAdapter implements GameCompletionListene
         setupGameLayout();
         mainTable.setDebug(true);
 
-        // --- Lógica de Input modificada ---
         stage.addListener(new InputListener() {
             @Override
             public boolean keyDown(InputEvent event, int keycode) {
+                // --- Log de Captura de Input ---
+                Gdx.app.log("InputCapture", "Tecla pressionada: " + Input.Keys.toString(keycode));
+                // --- Fim da modificação ---
+
                 if (gameArea == null) {
                     return false;
                 }
@@ -85,7 +88,6 @@ public class LayoutScreen extends ScreenAdapter implements GameCompletionListene
                 return false;
             }
         });
-        // --- Fim da modificação ---
     }
 
     private void setupGameLayout() {
@@ -122,8 +124,6 @@ public class LayoutScreen extends ScreenAdapter implements GameCompletionListene
         stage.act(delta);
         stage.draw();
     }
-
-    // O método handleInput() foi removido.
 
     @Override
     public void resize(int width, int height) {

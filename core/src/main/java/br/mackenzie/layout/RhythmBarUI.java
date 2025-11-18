@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.ui.Widget;
-import com.badlogic.gdx.utils.Queue;
+import java.util.Queue; // <-- Mude o import aqui
 
 public class RhythmBarUI extends Widget {
 
@@ -16,10 +16,8 @@ public class RhythmBarUI extends Widget {
     private final Texture firstNoteTexture;
     private final RhythmManager rhythmManager;
 
-    // --- Texturas da zona de acerto modificadas ---
     private final Texture goodZoneTexture;
     private final Texture perfectZoneTexture;
-    // --- Fim da modificação ---
 
     public RhythmBarUI(RhythmManager rhythmManager) {
         super();
@@ -29,10 +27,8 @@ public class RhythmBarUI extends Widget {
         noteTexture = createColoredTexture(1, 1, Color.WHITE);
         firstNoteTexture = createColoredTexture(1, 1, Color.YELLOW);
 
-        // --- Inicialização das novas texturas ---
-        goodZoneTexture = createColoredTexture(1, 1, Color.CYAN);    // <-- Cor para a zona "Boa"
-        perfectZoneTexture = createColoredTexture(1, 1, Color.GREEN); // <-- Cor para a zona "Perfeita"
-        // --- Fim da modificação ---
+        goodZoneTexture = createColoredTexture(1, 1, Color.CYAN);
+        perfectZoneTexture = createColoredTexture(1, 1, Color.GREEN);
     }
 
     private Texture createColoredTexture(int width, int height, Color color) {
@@ -50,35 +46,31 @@ public class RhythmBarUI extends Widget {
 
         batch.draw(barTexture, getX(), getY(), getWidth(), getHeight());
 
-        // --- Lógica de desenho da zona de acerto modificada ---
         float goodZoneWidth = 200;
         float perfectZoneWidth = 80;
         float goodZoneX = getX() + (getWidth() - goodZoneWidth) / 2;
         float perfectZoneX = getX() + (getWidth() - perfectZoneWidth) / 2;
 
-        // Desenha a zona "Boa" (mais larga) com cor ciano e transparência
         batch.setColor(1, 1, 1, 0.5f);
         batch.draw(goodZoneTexture, goodZoneX, getY(), goodZoneWidth, getHeight());
 
-        // Desenha a zona "Perfeita" (mais estreita) por cima com cor verde e mais opaca
         batch.setColor(1, 1, 1, 0.7f);
         batch.draw(perfectZoneTexture, perfectZoneX, getY(), perfectZoneWidth, getHeight());
-        batch.setColor(Color.WHITE); // Reseta a cor para o desenho das notas
-        // --- Fim da modificação ---
+        batch.setColor(Color.WHITE);
 
         Queue<RhythmNote> notes = rhythmManager.getActiveNotes();
         float travelDistance = getWidth();
         float noteWidth = 20f;
 
         for (RhythmNote note : notes) {
-            if (note.isActive) {
-                float timeUntilHit = note.targetTime - rhythmManager.getSongTime();
-                float progress = 1.0f - (timeUntilHit / RhythmManager.getSecondsToTravel());
-                float noteX = getX() + (progress * travelDistance);
+            // A verificação 'if (note.isActive)' foi removida
+            float timeUntilHit = note.targetTime - rhythmManager.getSongTime();
+            float progress = 1.0f - (timeUntilHit / RhythmManager.getSecondsToTravel());
+            float noteX = getX() + (progress * travelDistance);
 
-                Texture currentNoteTexture = note.isFirstNoteOfBeat ? firstNoteTexture : noteTexture;
-                batch.draw(currentNoteTexture, noteX - noteWidth / 2f, getY(), noteWidth, getHeight());
-            }
+            // A verificação 'note.isFirstNoteOfBeat' agora funciona
+            Texture currentNoteTexture = note.isFirstNoteOfBeat ? firstNoteTexture : noteTexture;
+            batch.draw(currentNoteTexture, noteX - noteWidth / 2f, getY(), noteWidth, getHeight());
         }
     }
 
@@ -86,9 +78,7 @@ public class RhythmBarUI extends Widget {
         barTexture.dispose();
         noteTexture.dispose();
         firstNoteTexture.dispose();
-        // --- Libera as novas texturas ---
         goodZoneTexture.dispose();
         perfectZoneTexture.dispose();
-        // --- Fim da modificação ---
     }
 }

@@ -3,103 +3,97 @@ package br.mackenzie.layout.gameAreaUI;
 import br.mackenzie.layout.gameAreaUI.enums.GameMode;
 import br.mackenzie.layout.gameAreaUI.enums.HitResult;
 import br.mackenzie.layout.gameAreaUI.enums.PlayerDirection;
-import com.badlogic.gdx.utils.Queue;
-
-import java.util.EnumMap;
-import java.util.Map;
+import com.badlogic.gdx.Gdx;
+import java.util.LinkedList;
+import java.util.Queue;
 
 public class RhythmManager {
 
-    // Configurações de Ritmo
-    private static final float BPM = 90.0f;
-    private static final float BEAT_INTERVAL = 60.0f / BPM;
+    // --- Variáveis de Ritmo e Tempo ---
+    private float bpm = 70.0f;
+    private float secondsPerBeat;
+    private float songTime = 0f;
+    private float rhythmBarWidth;
+
+    // --- Lógica das Notas ---
+    private final Queue<RhythmNote> activeNotes = new LinkedList<>();
+    private GameMode currentMode;
+    private float nextNoteSpawnTime = 0f;
+    private int noteIndex = 0;
+
+    // --- Janelas de Acerto (em segundos) ---
+    public static final float PERFECT_WINDOW = 0.1f;
+    public static final float GOOD_WINDOW = 0.2f;
+
+    // --- Tempo de Viagem da Nota ---
     private static final float SECONDS_TO_TRAVEL = 2.0f;
 
-    // Janelas de tempo para julgamento (em segundos)
-    private static final float PERFECT_WINDOW = 0.08f;
-    private static final float GOOD_WINDOW = 0.16f;
+    public RhythmManager(float rhythmBarWidth) {
+        this.rhythmBarWidth = rhythmBarWidth;
+        setupRhythm();
+    }
 
-    private float songTime = 0;
-    private float nextNoteTime = 0;
-    private int divisions = 1;
-    private PlayerDirection nextDirection = PlayerDirection.LEFT;
-    private GameMode currentMode;
-    private int noteInBeatCounter = 0;
-
-    private final Queue<RhythmNote> notes = new Queue<>();
-
-    private static final Map<GameMode, Integer> MODE_DIVISIONS = new EnumMap<>(GameMode.class);
-
-    static {
-        MODE_DIVISIONS.put(GameMode.FORNO, 1);
-        MODE_DIVISIONS.put(GameMode.BETERRABA, 2);
-        MODE_DIVISIONS.put(GameMode.COGUMELO, 3);
-        MODE_DIVISIONS.put(GameMode.BATATA, 4);
-        // A linha para GameMode.FRUTA foi removida para corresponder aos modos 1, 2, 3 e 4.
+    private void setupRhythm() {
+        secondsPerBeat = 60.0f / bpm;
     }
 
     public void update(float delta) {
         songTime += delta;
 
-        while (songTime >= nextNoteTime) {
-            float targetTime = nextNoteTime + SECONDS_TO_TRAVEL;
-
-            boolean isFirstOfBeat = (noteInBeatCounter == 0);
-            notes.addLast(new RhythmNote(targetTime, nextDirection, isFirstOfBeat));
-
-            noteInBeatCounter = (noteInBeatCounter + 1) % divisions;
-
-            nextDirection = (nextDirection == PlayerDirection.LEFT) ? PlayerDirection.RIGHT : PlayerDirection.LEFT;
-
-            float noteInterval;
-            if (currentMode == GameMode.FORNO) {
-                noteInterval = BEAT_INTERVAL * 4;
-            } else {
-                noteInterval = BEAT_INTERVAL / divisions;
-            }
-            nextNoteTime += noteInterval;
+        while (!activeNotes.isEmpty() && (songTime > activeNotes.peek().targetTime + GOOD_WINDOW)) {
+            activeNotes.poll();
+            Gdx.app.log("RhythmManager", "Note missed!");
         }
 
-        while (notes.size > 0 && notes.first().targetTime < songTime - GOOD_WINDOW) {
-            notes.removeFirst().isActive = false;
+        if (songTime >= nextNoteSpawnTime && currentMode != null) {
+            spawnNote();
+            nextNoteSpawnTime += secondsPerBeat;
         }
+    }
+
+    private void spawnNote() {
+        PlayerDirection direction = (noteIndex % 2 == 0) ? PlayerDirection.LEFT : PlayerDirection.RIGHT;
+        float target = songTime + SECONDS_TO_TRAVEL;
+        // Define a primeira nota do compasso (assumindo 4/4)
+        boolean isFirst = (noteIndex % 4 == 0);
+        activeNotes.add(new RhythmNote(target, direction, isFirst)); // Passa o novo valor
+        noteIndex++;
     }
 
     public HitResult checkHit(PlayerDirection hitDirection) {
-        if (notes.size == 0) {
-            return HitResult.NONE;
-        }
-
-        RhythmNote note = notes.first();
-
-        if (note.requiredDirection != hitDirection) {
+        if (activeNotes.isEmpty()) {
             return HitResult.MISS;
         }
 
-        float timeDifference = Math.abs(songTime - note.targetTime);
+        RhythmNote nextNote = activeNotes.peek();
+        float timeDifference = Math.abs(songTime - nextNote.targetTime);
+
+        if (nextNote.direction != hitDirection) {
+            return HitResult.MISS;
+        }
 
         if (timeDifference <= PERFECT_WINDOW) {
-            notes.removeFirst().isActive = false;
+            activeNotes.poll();
             return HitResult.PERFECT;
         } else if (timeDifference <= GOOD_WINDOW) {
-            notes.removeFirst().isActive = false;
+            activeNotes.poll();
             return HitResult.GOOD;
         }
 
-        return HitResult.NONE;
+        return HitResult.MISS;
     }
 
-    public void setMode(GameMode mode) {
-        this.currentMode = mode;
-        this.divisions = MODE_DIVISIONS.getOrDefault(mode, 1);
-        this.songTime = 0;
-        this.nextNoteTime = 0;
-        this.notes.clear();
-        this.noteInBeatCounter = 0;
+    public void setMode(GameMode newMode) {
+        this.currentMode = newMode;
+        activeNotes.clear();
+        songTime = 0;
+        noteIndex = 0;
+        nextNoteSpawnTime = SECONDS_TO_TRAVEL;
+        Gdx.app.log("RhythmManager", "Mode changed to: " + newMode.name());
     }
 
     public Queue<RhythmNote> getActiveNotes() {
-        return notes;
+        return activeNotes;
     }
 
     public float getSongTime() {

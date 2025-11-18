@@ -18,12 +18,15 @@ public class LeftPaneUI extends Table {
     private final Image crowdImage;
     private final TextureRegionDrawable leftDrawable;
     private final TextureRegionDrawable rightDrawable;
+    private final TextureRegionDrawable crowdDefaultDrawable;
+    private final TextureRegionDrawable crowdCheeringDrawable;
 
     private final Texture leftTexture;
     private final Texture rightTexture;
     private final Texture bgTexture;
     private final Texture fanTexture;
     private final Texture crowdTexture;
+    private final Texture crowdCheeringTexture;
 
     public LeftPaneUI(Skin skin) {
         super(skin);
@@ -33,6 +36,7 @@ public class LeftPaneUI extends Table {
         rightTexture = new Texture(Gdx.files.internal(AssetPaths.IMAGES_PATH + "bicicleta_direita.png"));
         fanTexture = new Texture(Gdx.files.internal(AssetPaths.IMAGES_PATH + "ventilador.png"));
         crowdTexture = new Texture(Gdx.files.internal(AssetPaths.IMAGES_PATH + "multidao.png"));
+        crowdCheeringTexture = new Texture(Gdx.files.internal(AssetPaths.IMAGES_PATH + "torcida_esquerda.png"));
 
         // Configura a imagem do jogador
         this.leftDrawable = new TextureRegionDrawable(leftTexture);
@@ -45,7 +49,9 @@ public class LeftPaneUI extends Table {
         this.fanImage.setScaling(Scaling.fit);
 
         // Configura a imagem da multidão
-        this.crowdImage = new Image(crowdTexture);
+        this.crowdDefaultDrawable = new TextureRegionDrawable(crowdTexture);
+        this.crowdCheeringDrawable = new TextureRegionDrawable(crowdCheeringTexture);
+        this.crowdImage = new Image(crowdDefaultDrawable);
         this.crowdImage.setScaling(Scaling.fit);
 
         // Cria a imagem de fundo
@@ -90,11 +96,20 @@ public class LeftPaneUI extends Table {
         }
     }
 
+    public void showCheeringCrowd() {
+        crowdImage.setDrawable(crowdCheeringDrawable);
+    }
+
+    public void showDefaultCrowd() {
+        crowdImage.setDrawable(crowdDefaultDrawable);
+    }
+
     public void dispose() {
         leftTexture.dispose();
         rightTexture.dispose();
         bgTexture.dispose();
         fanTexture.dispose();
         crowdTexture.dispose();
+        crowdCheeringTexture.dispose();
     }
 }
