@@ -2,9 +2,11 @@ package br.mackenzie.layout;
 
 import br.mackenzie.layout.gameAreaUI.GameAreaUI;
 import br.mackenzie.layout.gameAreaUI.enums.PlayerDirection;
+import br.mackenzie.utils.AssetPaths;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -25,6 +27,8 @@ public class LayoutScreen extends ScreenAdapter implements GameCompletionListene
     private GameAreaUI gameArea;
     private RhythmBarUI rhythmBar;
     private EndScreenUI endScreen;
+
+    private Music bgMusic;
 
     @Override
     public void show() {
@@ -49,6 +53,16 @@ public class LayoutScreen extends ScreenAdapter implements GameCompletionListene
         buttonStyle.down = skin.newDrawable("white", Color.LIGHT_GRAY);
         buttonStyle.over = skin.newDrawable("white", Color.GRAY);
         skin.add("default", buttonStyle);
+
+        try {
+            bgMusic = Gdx.audio.newMusic(Gdx.files.internal(AssetPaths.SOUNDS_PATH +"bg_music.mp3"));
+            bgMusic.setLooping(true);
+            bgMusic.setVolume(0.15f); // volume reduzido (0.0 - 1.0)
+            bgMusic.play();
+        } catch (Exception e) {
+            Gdx.app.error("LayoutScreen", "Não foi possível carregar música de fundo em `bg_music.mp3`", e);
+            bgMusic = null;
+        }
 
         topBar = new HeatBarUI();
         gameArea = new GameAreaUI(skin, this, topBar);

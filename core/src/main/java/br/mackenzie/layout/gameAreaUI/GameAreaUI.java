@@ -5,7 +5,9 @@ import br.mackenzie.layout.HeatBarUI;
 import br.mackenzie.layout.gameAreaUI.enums.GameMode;
 import br.mackenzie.layout.gameAreaUI.enums.HitResult;
 import br.mackenzie.layout.gameAreaUI.enums.PlayerDirection;
+import br.mackenzie.utils.AssetPaths;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 
@@ -22,11 +24,17 @@ public class GameAreaUI extends Table {
     private int currentItemFrameIndex = 0;
     private PlayerDirection lastHitDirection = PlayerDirection.RIGHT;
 
+    private final Sound hitSound; // som tocado ao acertar
+    private final Sound missSound;
+
     public GameAreaUI(Skin skin, GameCompletionListener listener, HeatBarUI heatBar) {
         super(skin);
         this.completionListener = listener;
         this.rhythmManager = new RhythmManager(120.0f);
         this.heatBar = heatBar; // Recebe a instância da HeatBar
+
+        hitSound = Gdx.audio.newSound(Gdx.files.internal(AssetPaths.SOUNDS_PATH+ "acerto.mp3"));
+        missSound = Gdx.audio.newSound(Gdx.files.internal(AssetPaths.SOUNDS_PATH+ "miss.mp3"));
 
         leftPane = new LeftPaneUI(skin);
         rebuildRightPane();
@@ -53,6 +61,11 @@ public class GameAreaUI extends Table {
         HitResult result = rhythmManager.checkHit(hitDirection);
 
         if (result == HitResult.PERFECT || result == HitResult.GOOD) {
+            // toca som de acerto
+            if (hitSound != null) {
+                hitSound.play();
+            }
+
             heatBar.registerHit(); // Incrementa a barra de calor
             leftPane.showCheeringCrowd(); // Mostra a torcida feliz
             leftPane.setPlayerDirection(hitDirection);
@@ -82,7 +95,10 @@ public class GameAreaUI extends Table {
                 }
             }
         } else {
-            // Se errou (Miss), mostra a multidão padrão
+            // Se errou (Miss), toca som de erro e mostra a multidão padrão
+            if (missSound != null) {
+                missSound.play();
+            }
             leftPane.showDefaultCrowd();
         }
     }

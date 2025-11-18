@@ -1,10 +1,19 @@
+// groovy
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 eclipse.project.name = appName + '-core'
 
 dependencies {
+  // Removido: implementation project(":core")  <-- causava dependência circular
+  implementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
+  implementation "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"                       // API
+  runtimeOnly   "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop" // DLLs nativas
   api "com.badlogicgames.gdx:gdx:$gdxVersion"
 
   if(enableGraalNative == 'true') {
     implementation "io.github.berstanio:gdx-svmhelper-annotations:$graalHelperVersion"
   }
+}
+
+tasks.withType(JavaCompile) {
+  options.encoding = 'UTF-8'
 }

@@ -20,8 +20,8 @@ public class HeatBarUI extends Widget implements Disposable {
     private final Texture texture;
 
     private float currentValue = 0f; // Valor de 0 a 100
-    private final float regressionRate = 5.0f; // Pontos por segundo
-    private final float incrementAmount = 10.0f; // Pontos por acerto
+    private final float regressionRate = 2.5f; // Pontos por segundo
+    private final float incrementAmount = 20.0f; // Pontos por acerto
 
     public HeatBarUI() {
         // Cria um Pixmap de 1x1 pixel para gerar texturas coloridas
