@@ -1,9 +1,10 @@
 # EmberKeeper
 
-Projeto de laboratório da disciplina de Jogos Digitais, orientado pelo Prof. Me. Luiz Carlos Machi Lozano.
+Jogo sério para reabilitação física feito com libGDX. O jogador controla o jogo pedalando em uma bicicleta ergométrica: um dispositivo IoT lê as pedaladas, e a velocidade e a consistência viram as métricas de progresso.
 
-- Autor: Mateus Kenzo Iochimoto  
-- RA: 10400995
+<!-- coloque aqui um GIF ou captura de tela do jogo -->
+
+Projeto de laboratório da disciplina de Jogos Digitais (Universidade Presbiteriana Mackenzie), orientado pelo Prof. Me. Luiz Carlos Machi Lozano.
 
 ## Objetivo
 
@@ -21,3 +22,15 @@ O jogo deve ser funcional e integrar aspectos que incentivem a melhoria do pacie
 
 - Velocidade das pedaladas
 - Consistência das pedaladas
+
+## Como executar
+
+Pré-requisito: JDK instalado.
+
+```bash
+./gradlew lwjgl3:run
+```
+
+## Autor
+
+Mateus Kenzo Iochimoto
